@@ -5,6 +5,7 @@ set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
 export REPO_NAME=ponesicek RELEASE_TAG=repo
+export PACKAGER='Ponesicek arch-repo CI <ponesicek@users.noreply.github.com>'
 
 : "${GPG_PRIVATE_KEY:?The GPG_PRIVATE_KEY repository secret is not set}"
 : "${GH_TOKEN:?}" "${GH_REPO:?}"
