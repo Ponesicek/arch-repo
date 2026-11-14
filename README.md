@@ -7,6 +7,12 @@ you ever seeing the PKGBUILD.
 | Package | Upstream | Packaging based on |
 |---|---|---|
 | `jetbrains-toolbox` | [JetBrains Toolbox App](https://www.jetbrains.com/toolbox-app/) | [AUR `jetbrains-toolbox`](https://aur.archlinux.org/packages/jetbrains-toolbox) |
+| `orca-ide` | [Orca](https://orca.dev/) ([GitHub](https://github.com/stablyai/orca)) | Upstream's official `.deb`, repackaged here (no AUR base, so no review PRs) |
+
+`orca-ide` is not `extra/orca`, which is GNOME's screen reader. Its updater
+checks GitHub's latest stable release and verifies the `.deb` against the
+SHA-512 in that release's `latest-linux.yml`. Orca's in-app updater recognizes
+the install as externally managed and doesn't try to update itself.
 
 ## How it keeps updates safe
 
@@ -190,4 +196,5 @@ scripts/aur-watch.sh           version-only AUR change → record, else review P
 scripts/publish.sh             makepkg --sign, repo-add --sign, upload to release
 keys/ponesicek-repo.asc        public signing key
 jetbrains-toolbox/             PKGBUILD + files from the AUR, update.sh, .aur-commit
+orca-ide/                      PKGBUILD repackaging the upstream .deb, update.sh
 ```

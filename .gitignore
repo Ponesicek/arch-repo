@@ -3,3 +3,5 @@
 *.pkg.tar.*
 */src/
 */pkg/
+*.deb
+orca-ide/orca-ide-LICENSE-*

@@ -1,0 +1,55 @@
+# Repackages the official Orca .deb from https://github.com/stablyai/orca/releases.
+# Written for this repo (no AUR base); update.sh bumps pkgver and checksums.
+
+pkgname=orca-ide
+pkgver=1.4.259
+pkgrel=1
+pkgdesc='Orca agent development environment: run coding agents in parallel git worktrees'
+arch=('x86_64')
+url='https://github.com/stablyai/orca'
+license=('MIT')
+depends=(
+  alsa-lib
+  at-spi2-core
+  gtk3
+  libnotify
+  libsecret
+  libxss
+  libxtst
+  mesa
+  nss
+  util-linux-libs
+  xdg-utils
+)
+optdepends=(
+  'python: notebook kernels and computer use'
+  'python-gobject: computer use'
+  'xdotool: computer use on X11'
+  'xclip: computer use clipboard on X11'
+  'xorg-server-xvfb: headless computer use'
+  'libappindicator-gtk3: tray icon'
+)
+# extra/orca is GNOME's screen reader, which is why upstream calls this orca-ide.
+options=('!strip' '!debug')
+source=("https://github.com/stablyai/orca/releases/download/v${pkgver}/orca-ide_${pkgver}_amd64.deb"
+        "orca-ide-LICENSE-${pkgver}::https://raw.githubusercontent.com/stablyai/orca/v${pkgver}/LICENSE")
+noextract=("orca-ide_${pkgver}_amd64.deb")
+b2sums=('50ffe3ad9f21f4cf737bba56001e977d5e548451a93e2143d01368a1065f0df19407e267c092c482015db6de22d74fabbc8a872e5fedb0d4baf176cadcc7f816'
+        'fdce4a5f4313d37ca3f4a68dc9c31a242cd7f0fb7eae5a9764b9ca79b9316d328d2374154443338f9addc9134490c95fd1973c79c307d5f228f0f37dd6e3fa45')
+
+prepare() {
+  mkdir -p deb
+  bsdtar -xOf "orca-ide_${pkgver}_amd64.deb" 'data.tar.*' | bsdtar -xf - -C deb
+}
+
+package() {
+  cp -a deb/opt deb/usr "${pkgdir}/"
+
+  # Upstream's postinst creates this symlink; pacman packages ship it instead.
+  # The chrome-sandbox setuid bit from postinst is not needed: Arch kernels
+  # allow unprivileged user namespaces.
+  install -dm755 "${pkgdir}/usr/bin"
+  ln -s /opt/Orca/resources/bin/orca-ide "${pkgdir}/usr/bin/orca-ide"
+
+  install -Dm644 "orca-ide-LICENSE-${pkgver}" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
