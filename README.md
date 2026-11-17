@@ -8,11 +8,22 @@ you ever seeing the PKGBUILD.
 |---|---|---|
 | `jetbrains-toolbox` | [JetBrains Toolbox App](https://www.jetbrains.com/toolbox-app/) | [AUR `jetbrains-toolbox`](https://aur.archlinux.org/packages/jetbrains-toolbox) |
 | `orca-ide` | [Orca](https://orca.dev/) ([GitHub](https://github.com/stablyai/orca)) | Upstream's official `.deb`, repackaged here (no AUR base, so no review PRs) |
+| `artcraft-launcher` | [ArtCraft Launcher](https://getartcraft.com/apps) ([GitHub](https://github.com/storytold/craft-launcher)) | Upstream's official signed `.pkg.tar.zst`, repackaged here (no AUR base, so no review PRs) |
 
 `orca-ide` is not `extra/orca`, which is GNOME's screen reader. Its updater
 checks GitHub's latest stable release and verifies the `.deb` against the
 SHA-512 in that release's `latest-linux.yml`. Orca's in-app updater recognizes
 the install as externally managed and doesn't try to update itself.
+
+`artcraft-launcher` is checked against upstream's release signing key,
+pinned in [`artcraft-launcher/keys/pgp/`](artcraft-launcher/keys/pgp/)
+(fingerprint `2B76 741B 414A AD6C D33E 6312 13A0 05C0 B9D7 C3ED`, also
+published on [getartcraft.com/linux](https://getartcraft.com/linux)). Its
+updater only takes a release whose `SHA256SUMS.txt` carries that key's
+signature, and makepkg checks the package's own signature on every build.
+The launcher installs the Craft apps themselves as AppImages in
+`~/Applications` (or as Flatpaks when Flatpak is installed). Those apps come
+straight from upstream, not from this repo.
 
 ## How it keeps updates safe
 
@@ -184,6 +195,9 @@ is ever exposed, or you want to rotate it:
    when upstream releases, and verifies the download against an upstream
    checksum or signature. [`jetbrains-toolbox/update.sh`](jetbrains-toolbox/update.sh)
    is the template.
+   If upstream signs its downloads, put the key in
+   `<name>/keys/pgp/<fingerprint>.asc` and list the fingerprint in the
+   PKGBUILD's `validpgpkeys`. CI imports these keys so makepkg can verify them.
 3. Push. The workflow picks up every `*/PKGBUILD` automatically.
 
 ## Layout
@@ -197,4 +211,6 @@ scripts/publish.sh             makepkg --sign, repo-add --sign, upload to releas
 keys/ponesicek-repo.asc        public signing key
 jetbrains-toolbox/             PKGBUILD + files from the AUR, update.sh, .aur-commit
 orca-ide/                      PKGBUILD repackaging the upstream .deb, update.sh
+artcraft-launcher/             PKGBUILD repackaging the upstream signed package,
+                               update.sh, keys/pgp/<fingerprint>.asc upstream key
 ```

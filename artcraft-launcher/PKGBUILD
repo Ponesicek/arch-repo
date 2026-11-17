@@ -1,0 +1,58 @@
+# Repackages the official Arch package from
+# https://github.com/storytold/craft-launcher/releases.
+# Written for this repo (no AUR base); update.sh bumps pkgver and checksums.
+#
+# makepkg checks the upstream package's detached signature against the key in
+# keys/pgp/, whose fingerprint is also published on https://getartcraft.com/linux.
+
+pkgname=artcraft-launcher
+pkgver=0.19.2
+pkgrel=1
+pkgdesc='Install, update and launch the Craft App Suite'
+arch=('x86_64')
+url='https://getartcraft.com/apps'
+license=('MIT OR Apache-2.0')
+depends=(
+  gcc-libs
+  glibc
+  hicolor-icon-theme
+  libxkbcommon
+  libxkbcommon-x11
+  vulkan-icd-loader
+)
+optdepends=(
+  'alsa-lib: sound support'
+  'pipewire-alsa: audio playback and recording via PipeWire'
+  'pulseaudio: audio playback and recording via PulseAudio'
+  'wayland: native Wayland display support'
+  'libx11: X11 and XWayland display support'
+  'libxcursor: X11 cursor handling'
+  'libxi: X11 input handling'
+  'libxrandr: X11 display resolution handling'
+  'libglvnd: GPU rendering through EGL'
+  'mesa: GPU rendering through EGL'
+  'vulkan-driver: GPU rendering through Vulkan'
+  'xdg-desktop-portal: native desktop integration and file dialogs'
+  'cups: printing support'
+)
+# Upstream names its own package ai.storyteller.artcraft-launcher.
+conflicts=('ai.storyteller.artcraft-launcher' 'artcraft-launcher-appimage' 'artcraft-launcher-bin')
+replaces=('artcraft-launcher-appimage')
+options=('!strip' '!debug')
+_pkg="artcraft-launcher-${pkgver}-linux-x86_64.pkg.tar.zst"
+source=("https://github.com/storytold/craft-launcher/releases/download/v${pkgver}/${_pkg}"
+        "https://github.com/storytold/craft-launcher/releases/download/v${pkgver}/${_pkg}.sig")
+noextract=("${_pkg}")
+validpgpkeys=('2B76741B414AAD6CD33E631213A005C0B9D7C3ED') # ArtCraft Linux Release Signing Key
+b2sums=('047210b94fbbc7b0e4cde5da1d51f3eb5d9619b1f05252011f100c49053944aa71545c3ff87b25a90b76064b6d7333ce52b9932f876e0729ccdde6416048e278'
+        'SKIP')
+
+prepare() {
+  rm -rf upstream
+  mkdir upstream
+  bsdtar -xf "${_pkg}" -C upstream --exclude '.*'
+}
+
+package() {
+  cp -a upstream/usr "${pkgdir}/"
+}

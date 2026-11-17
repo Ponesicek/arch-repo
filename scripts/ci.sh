@@ -13,6 +13,15 @@ gpg --batch --quiet --import <<<"$GPG_PRIVATE_KEY"
 GPGKEY=$(gpg --list-secret-keys --with-colons | awk -F: '$1 == "fpr" { print $10; exit }')
 export GPGKEY
 
+# Upstream keys that makepkg checks sources against (validpgpkeys). Each file
+# is named after its fingerprint; makepkg still only accepts the fingerprints a
+# PKGBUILD lists, so importing a key here trusts it for nothing else.
+shopt -s nullglob
+for key in */keys/pgp/*.asc; do
+  gpg --batch --quiet --import "$key"
+done
+shopt -u nullglob
+
 git config user.name 'github-actions[bot]'
 git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
 git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GH_REPO}.git"
