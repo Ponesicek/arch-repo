@@ -1,0 +1,57 @@
+# Repackages the official Paper Desktop .deb from https://paper.design/downloads.
+# Written for this repo (no AUR base); update.sh bumps pkgver, _build and the
+# checksum.
+
+pkgname=paper-desktop
+pkgver=0.5.19
+_build=261113wtgdq1unn
+pkgrel=1
+pkgdesc='Paper desktop app: design canvas built on HTML and CSS'
+arch=('x86_64')
+url='https://paper.design'
+license=('LicenseRef-Paper')
+depends=(
+  alsa-lib
+  at-spi2-core
+  gtk3
+  libnotify
+  libsecret
+  libxss
+  libxtst
+  mesa
+  nss
+  util-linux-libs
+  xdg-utils
+)
+optdepends=('libappindicator-gtk3: tray icon')
+options=('!strip' '!debug')
+_deb="paper-desktop-${pkgver}-build-${_build}-amd64.deb"
+# The same file that Paper's own updater and APT repository point to.
+source=("https://download.todesktop.com/2601167vjw8xe/${_deb}")
+noextract=("${_deb}")
+# Taken from Paper's APT repository, whose index is signed by ToDesktop's key
+# (see update.sh and keys/).
+sha256sums=('1c9b46f96021f339b6b55e068d68d726f213edac3d2dbdc83fc814df8bbb307f')
+
+prepare() {
+  rm -rf deb
+  mkdir deb
+  bsdtar -xOf "${_deb}" 'data.tar.*' | bsdtar -xf - -C deb
+}
+
+package() {
+  cp -a deb/opt deb/usr "${pkgdir}/"
+  rm -rf "${pkgdir}/usr/share/doc"
+
+  # resources/package-type makes Paper's updater install .deb updates itself.
+  # Without the file it falls back to the AppImage updater, which does nothing
+  # outside an AppImage, so pacman stays in charge of updates.
+  rm "${pkgdir}/opt/Paper/resources/package-type"
+
+  # Upstream's postinst creates this symlink; pacman packages ship it instead.
+  # Not carried over from postinst: the chrome-sandbox setuid bit (Arch kernels
+  # allow unprivileged user namespaces), the AppArmor profile (Arch doesn't
+  # enable AppArmor by default), and the APT source it writes for Debian.
+  install -dm755 "${pkgdir}/usr/bin"
+  ln -s /opt/Paper/paper-desktop "${pkgdir}/usr/bin/paper-desktop"
+}

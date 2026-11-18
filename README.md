@@ -11,6 +11,7 @@ you ever seeing the PKGBUILD.
 | `artcraft-launcher` | [ArtCraft Launcher](https://getartcraft.com/apps) ([GitHub](https://github.com/storytold/craft-launcher)) | Upstream's official signed `.pkg.tar.zst`, repackaged here (no AUR base, so no review PRs) |
 | `capy` | [Capy](https://capy.ai/download) | Upstream's official `.deb`, repackaged here (no AUR base, so no review PRs) |
 | `codeaf` | [CodeAF](https://github.com/Agent-Field/CodeAF) | Built here from upstream's release tag (no AUR base, so no review PRs) |
+| `paper-desktop` | [Paper](https://paper.design/downloads) | Upstream's official `.deb`, repackaged here (no AUR base, so no review PRs) |
 
 `orca-ide` is not `extra/orca`, which is GNOME's screen reader. Its updater
 checks GitHub's latest stable release and verifies the `.deb` against the
@@ -40,6 +41,16 @@ CodeAF's own `internal/furrowbin/pin.json`. The binary lives in
 `/usr/lib/codeaf/`, which CodeAF refuses to update itself in, and the
 `/usr/bin/codeaf` wrapper sets `CODEAF_NO_UPDATE_CHECK=1` so it doesn't offer
 its curl installer.
+
+`paper-desktop` follows Paper's APT repository, which ToDesktop (the service
+that builds Paper) hosts and signs. Its updater only takes a release when
+`InRelease` carries a valid signature from ToDesktop's key, pinned in
+[`paper-desktop/keys/`](paper-desktop/keys/) (fingerprint
+`91C2 89D4 9135 E691 E3D7  E13B D504 2931 F557 7C5E`, taken from the
+`paper-desktop.sources` file Paper's own `.deb` installs). The SHA-256 of the
+`.deb` comes from that signed index, and makepkg checks it on every build. The
+package drops the `.deb`'s `resources/package-type` marker, so Paper's own
+updater stays off.
 
 ## How it keeps updates safe
 
@@ -236,4 +247,6 @@ artcraft-launcher/             PKGBUILD repackaging the upstream signed package,
                                update.sh, keys/pgp/<fingerprint>.asc upstream key
 capy/                          PKGBUILD repackaging the upstream .deb, update.sh
 codeaf/                        PKGBUILD building the upstream release tag, update.sh
+paper-desktop/                 PKGBUILD repackaging the upstream .deb, update.sh,
+                               keys/<fingerprint>.asc ToDesktop APT key
 ```
