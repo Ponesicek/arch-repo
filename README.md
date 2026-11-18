@@ -9,6 +9,7 @@ you ever seeing the PKGBUILD.
 | `jetbrains-toolbox` | [JetBrains Toolbox App](https://www.jetbrains.com/toolbox-app/) | [AUR `jetbrains-toolbox`](https://aur.archlinux.org/packages/jetbrains-toolbox) |
 | `orca-ide` | [Orca](https://orca.dev/) ([GitHub](https://github.com/stablyai/orca)) | Upstream's official `.deb`, repackaged here (no AUR base, so no review PRs) |
 | `artcraft-launcher` | [ArtCraft Launcher](https://getartcraft.com/apps) ([GitHub](https://github.com/storytold/craft-launcher)) | Upstream's official signed `.pkg.tar.zst`, repackaged here (no AUR base, so no review PRs) |
+| `opencode-desktop-bin` | [OpenCode desktop](https://opencode.ai/) ([GitHub](https://github.com/anomalyco/opencode)) | [AUR `opencode-desktop-bin`](https://aur.archlinux.org/packages/opencode-desktop-bin) |
 
 `orca-ide` is not `extra/orca`, which is GNOME's screen reader. Its updater
 checks GitHub's latest stable release and verifies the `.deb` against the
@@ -24,6 +25,13 @@ signature, and makepkg checks the package's own signature on every build.
 The launcher installs the Craft apps themselves as AppImages in
 `~/Applications` (or as Flatpaks when Flatpak is installed). Those apps come
 straight from upstream, not from this repo.
+
+`opencode-desktop-bin` runs the app on Arch's `electron44` instead of the
+Electron bundled in upstream's `.deb`. Its updater asks OpenCode's update API
+(the one the app's own updater uses) for the latest release and verifies both
+`.deb`s against the SHA-256 and SHA-512 listed there. The build stops if
+upstream moves to a different Electron major, so a PKGBUILD change (usually
+arriving as an AUR review PR) is needed before that release ships.
 
 ## How it keeps updates safe
 
@@ -213,4 +221,5 @@ jetbrains-toolbox/             PKGBUILD + files from the AUR, update.sh, .aur-co
 orca-ide/                      PKGBUILD repackaging the upstream .deb, update.sh
 artcraft-launcher/             PKGBUILD repackaging the upstream signed package,
                                update.sh, keys/pgp/<fingerprint>.asc upstream key
+opencode-desktop-bin/          PKGBUILD + LICENSE from the AUR, update.sh, .aur-commit
 ```

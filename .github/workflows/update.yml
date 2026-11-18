@@ -37,6 +37,18 @@ jobs:
           useradd --create-home builder
           chown -R builder: "$GITHUB_WORKSPACE"
 
+      # publish.sh builds with --nodeps, so install what the PKGBUILDs need at
+      # build time up front. The PKGBUILDs are evaluated as the build user.
+      - name: Install build dependencies
+        shell: bash
+        run: |
+          deps=$(for pkgbuild in */PKGBUILD; do
+            (cd "${pkgbuild%/PKGBUILD}" && runuser -u builder -- makepkg --printsrcinfo)
+          done | awk -F' = ' '$1 ~ /^\t(make|check)depends(_x86_64)?$/ { print $2 }' | sort -u)
+          if [[ -n $deps ]]; then
+            pacman -S --noconfirm --needed $deps
+          fi
+
       - name: Update, build and publish
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
