@@ -1,0 +1,63 @@
+# Builds CodeAF from its release tag at https://github.com/Agent-Field/CodeAF.
+# Written for this repo (no AUR base); update.sh bumps pkgver, the furrow pin
+# and the checksums.
+
+pkgname=codeaf
+pkgver=0.8.2
+pkgrel=1
+pkgdesc='Open-source software factory for open models: coding agents in your terminal'
+arch=('x86_64')
+url='https://github.com/Agent-Field/CodeAF'
+license=('Apache-2.0')
+makedepends=('git' 'go')
+optdepends=('git: work on projects in git repositories')
+options=('!lto' '!debug')
+# Every codeaf embeds furrow, upstream's prebuilt sandbox helper. Its release and
+# sha256 come from internal/furrowbin/pin.json at the tag; update.sh copies them
+# here, and the build checks the pin again before embedding it.
+_furrow_tag=v0.1.0
+source=("git+https://github.com/Agent-Field/CodeAF.git#tag=v${pkgver}"
+        "furrow-${_furrow_tag}-linux-amd64::https://github.com/Agent-Field/furrow/releases/download/${_furrow_tag}/furrow-linux-amd64")
+sha256sums=('06dba060cbebc11b9ddb85b2fc235b6828c2530025c9a0f000b7a1bf581398ba'
+            'c7f87ede6f352aad05d3aea42517eac9c86609adeb625187286411492663e2b4')
+
+prepare() {
+  cd CodeAF
+  export GOPATH="${srcdir}/gopath" GOFLAGS='-modcacherw'
+  go mod download
+}
+
+build() {
+  cd CodeAF
+  export GOPATH="${srcdir}/gopath"
+  export CGO_ENABLED=0 GOFLAGS='-modcacherw -mod=readonly'
+
+  # Same steps as upstream's release workflow (.github/workflows/release.yml).
+  go run ./internal/furrowbin/cmd/fetch -goos linux -goarch amd64 \
+    -from "${srcdir}/furrow-${_furrow_tag}-linux-amd64"
+  go generate ./internal/manual
+
+  # Stamped with the release tag, like upstream's own binaries. That keeps the
+  # version and channel right; the wrapper below turns the update check off.
+  local bi=github.com/Agent-Field/codeaf/internal/buildinfo
+  go build -tags=codeaf_packed_manual -trimpath \
+    -ldflags="-s -w -X ${bi}.rev=v${pkgver} -X ${bi}.dirty=false -X ${bi}.builtAt=$(date -u -d "@${SOURCE_DATE_EPOCH}" +%Y-%m-%dT%H:%M:%SZ)" \
+    -o codeaf ./cmd/codeaf
+}
+
+package() {
+  cd CodeAF
+  # The binary lives in /usr/lib, which codeaf already treats as owned by the
+  # system package manager, so /update refuses to replace it. The wrapper also
+  # stops the launch check that would suggest upstream's curl installer.
+  install -Dm755 codeaf "${pkgdir}/usr/lib/codeaf/codeaf"
+  install -Dm755 /dev/stdin "${pkgdir}/usr/bin/codeaf" <<'WRAPPER'
+#!/bin/sh
+# Updates come from pacman; turn off codeaf's own release check.
+export CODEAF_NO_UPDATE_CHECK=1
+exec /usr/lib/codeaf/codeaf "$@"
+WRAPPER
+
+  install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+  install -Dm644 THIRD-PARTY-NOTICES.md "${pkgdir}/usr/share/licenses/${pkgname}/THIRD-PARTY-NOTICES.md"
+}

@@ -10,6 +10,8 @@ you ever seeing the PKGBUILD.
 | `orca-ide` | [Orca](https://orca.dev/) ([GitHub](https://github.com/stablyai/orca)) | Upstream's official `.deb`, repackaged here (no AUR base, so no review PRs) |
 | `artcraft-launcher` | [ArtCraft Launcher](https://getartcraft.com/apps) ([GitHub](https://github.com/storytold/craft-launcher)) | Upstream's official signed `.pkg.tar.zst`, repackaged here (no AUR base, so no review PRs) |
 | `opencode-desktop-bin` | [OpenCode desktop](https://opencode.ai/) ([GitHub](https://github.com/anomalyco/opencode)) | [AUR `opencode-desktop-bin`](https://aur.archlinux.org/packages/opencode-desktop-bin) |
+| `capy` | [Capy](https://capy.ai/download) | Upstream's official `.deb`, repackaged here (no AUR base, so no review PRs) |
+| `codeaf` | [CodeAF](https://github.com/Agent-Field/CodeAF) | Built here from upstream's release tag (no AUR base, so no review PRs) |
 
 `orca-ide` is not `extra/orca`, which is GNOME's screen reader. Its updater
 checks GitHub's latest stable release and verifies the `.deb` against the
@@ -32,6 +34,20 @@ Electron bundled in upstream's `.deb`. Its updater asks OpenCode's update API
 `.deb`s against the SHA-256 and SHA-512 listed there. The build stops if
 upstream moves to a different Electron major, so a PKGBUILD change (usually
 arriving as an AUR review PR) is needed before that release ships.
+
+`capy` follows `latest-linux.yml` on `downloads.capy.ai`, the file Capy's own
+updater reads, and checks the `.deb` against the SHA-512 listed there. Capy
+publishes no signature, so this relies on HTTPS alone. The package drops the
+`.deb`'s `resources/package-type` marker, which makes Capy treat the install as
+externally managed and turn its own updater off.
+
+`codeaf` is compiled in CI from the release's git tag; makepkg pins a checksum
+of the tagged tree, so a tag that moves fails the build. CodeAF embeds
+upstream's prebuilt `furrow` helper, which must match the sha256 pinned in
+CodeAF's own `internal/furrowbin/pin.json`. The binary lives in
+`/usr/lib/codeaf/`, which CodeAF refuses to update itself in, and the
+`/usr/bin/codeaf` wrapper sets `CODEAF_NO_UPDATE_CHECK=1` so it doesn't offer
+its curl installer.
 
 ## How it keeps updates safe
 
@@ -222,4 +238,6 @@ orca-ide/                      PKGBUILD repackaging the upstream .deb, update.sh
 artcraft-launcher/             PKGBUILD repackaging the upstream signed package,
                                update.sh, keys/pgp/<fingerprint>.asc upstream key
 opencode-desktop-bin/          PKGBUILD + LICENSE from the AUR, update.sh, .aur-commit
+capy/                          PKGBUILD repackaging the upstream .deb, update.sh
+codeaf/                        PKGBUILD building the upstream release tag, update.sh
 ```

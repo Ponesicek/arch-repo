@@ -25,7 +25,7 @@ jobs:
       GH_REPO: ${{ github.repository }}
     steps:
       - name: Install tools
-        run: pacman -Syu --noconfirm --needed git github-cli jq pacman-contrib
+        run: pacman -Syu --noconfirm --needed git github-cli jq pacman-contrib go
 
       - uses: actions/checkout@v5
         with:

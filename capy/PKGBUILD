@@ -1,0 +1,51 @@
+# Repackages the official Capy .deb from https://capy.ai/download.
+# Written for this repo (no AUR base); update.sh bumps pkgver and checksums.
+
+pkgname=capy
+pkgver=0.9.2
+pkgrel=1
+pkgdesc='Capy desktop app: run coding agents in the cloud'
+arch=('x86_64')
+url='https://capy.ai'
+# The .deb declares "License: unknown"; Capy is proprietary.
+license=('LicenseRef-Capy')
+depends=(
+  alsa-lib
+  at-spi2-core
+  gtk3
+  libnotify
+  libsecret
+  libxss
+  libxtst
+  mesa
+  nss
+  util-linux-libs
+  xdg-utils
+)
+optdepends=('libappindicator-gtk3: tray icon')
+options=('!strip' '!debug')
+source=("https://downloads.capy.ai/stable/capy-${pkgver}-amd64.deb")
+noextract=("capy-${pkgver}-amd64.deb")
+b2sums=('3a0db76bd45b5973bbe24ec5fc350e7af31c32e6d81896c0afd9af0d6014ff5904a6d9e1bbf279f7885574dddf27438385fb0b2e278be54c36179f170176e829')
+
+prepare() {
+  rm -rf deb
+  mkdir deb
+  bsdtar -xOf "capy-${pkgver}-amd64.deb" 'data.tar.*' | bsdtar -xf - -C deb
+}
+
+package() {
+  cp -a deb/opt deb/usr "${pkgdir}/"
+
+  # resources/package-type tells Capy's updater it was installed from a .deb,
+  # so it would try to install .deb updates itself. Without the file Capy
+  # treats the install as externally managed and turns its updater off.
+  rm "${pkgdir}/opt/Capy/resources/package-type"
+
+  # Upstream's postinst creates this symlink; pacman packages ship it instead.
+  # Not carried over from postinst: the chrome-sandbox setuid bit (Arch kernels
+  # allow unprivileged user namespaces) and the AppArmor profile (Arch doesn't
+  # enable AppArmor by default, and the profile is unconfined anyway).
+  install -dm755 "${pkgdir}/usr/bin"
+  ln -s /opt/Capy/capy "${pkgdir}/usr/bin/capy"
+}
