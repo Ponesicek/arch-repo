@@ -34,6 +34,9 @@ for pkgbuild in */PKGBUILD; do
   echo "::endgroup::"
 done
 
+# A package whose directory was deleted is removed from the repository too.
+scripts/prune.sh || failed+=(prune)
+
 if [[ -n $(git log --oneline origin/main..HEAD) ]]; then
   git pull --quiet --rebase origin main
   git push --quiet origin HEAD:main

@@ -9,7 +9,6 @@ you ever seeing the PKGBUILD.
 | `jetbrains-toolbox` | [JetBrains Toolbox App](https://www.jetbrains.com/toolbox-app/) | [AUR `jetbrains-toolbox`](https://aur.archlinux.org/packages/jetbrains-toolbox) |
 | `orca-ide` | [Orca](https://orca.dev/) ([GitHub](https://github.com/stablyai/orca)) | Upstream's official `.deb`, repackaged here (no AUR base, so no review PRs) |
 | `artcraft-launcher` | [ArtCraft Launcher](https://getartcraft.com/apps) ([GitHub](https://github.com/storytold/craft-launcher)) | Upstream's official signed `.pkg.tar.zst`, repackaged here (no AUR base, so no review PRs) |
-| `opencode-desktop-bin` | [OpenCode desktop](https://opencode.ai/) ([GitHub](https://github.com/anomalyco/opencode)) | [AUR `opencode-desktop-bin`](https://aur.archlinux.org/packages/opencode-desktop-bin) |
 | `capy` | [Capy](https://capy.ai/download) | Upstream's official `.deb`, repackaged here (no AUR base, so no review PRs) |
 | `codeaf` | [CodeAF](https://github.com/Agent-Field/CodeAF) | Built here from upstream's release tag (no AUR base, so no review PRs) |
 
@@ -27,13 +26,6 @@ signature, and makepkg checks the package's own signature on every build.
 The launcher installs the Craft apps themselves as AppImages in
 `~/Applications` (or as Flatpaks when Flatpak is installed). Those apps come
 straight from upstream, not from this repo.
-
-`opencode-desktop-bin` runs the app on Arch's `electron44` instead of the
-Electron bundled in upstream's `.deb`. Its updater asks OpenCode's update API
-(the one the app's own updater uses) for the latest release and verifies both
-`.deb`s against the SHA-256 and SHA-512 listed there. The build stops if
-upstream moves to a different Electron major, so a PKGBUILD change (usually
-arriving as an AUR review PR) is needed before that release ships.
 
 `capy` follows `latest-linux.yml` on `downloads.capy.ai`, the file Capy's own
 updater reads, and checks the `.deb` against the SHA-512 listed there. Capy
@@ -224,6 +216,10 @@ is ever exposed, or you want to rotate it:
    PKGBUILD's `validpgpkeys`. CI imports these keys so makepkg can verify them.
 3. Push. The workflow picks up every `*/PKGBUILD` automatically.
 
+To drop a package, delete its directory and push. The next run removes it
+from the signed database and deletes its files from the release. Machines
+that already installed it keep it, as a foreign package.
+
 ## Layout
 
 ```
@@ -232,12 +228,12 @@ scripts/ci.sh                  entry point: loops over packages, pushes commits
 scripts/package.sh             per package: AUR watch → update → publish
 scripts/aur-watch.sh           version-only AUR change → record, else review PR
 scripts/publish.sh             makepkg --sign, repo-add --sign, upload to release
+scripts/prune.sh               repo-remove --sign packages whose directory is gone
 keys/ponesicek-repo.asc        public signing key
 jetbrains-toolbox/             PKGBUILD + files from the AUR, update.sh, .aur-commit
 orca-ide/                      PKGBUILD repackaging the upstream .deb, update.sh
 artcraft-launcher/             PKGBUILD repackaging the upstream signed package,
                                update.sh, keys/pgp/<fingerprint>.asc upstream key
-opencode-desktop-bin/          PKGBUILD + LICENSE from the AUR, update.sh, .aur-commit
 capy/                          PKGBUILD repackaging the upstream .deb, update.sh
 codeaf/                        PKGBUILD building the upstream release tag, update.sh
 ```
