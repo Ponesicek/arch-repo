@@ -1,0 +1,79 @@
+# Repackages the official Ardia .deb from https://ardia.dev.
+# Written for this repo (no AUR base); update.sh bumps pkgver and the checksum.
+# Ardia ships Linux builds only as nightlies so far. A nightly's
+# 0.2.47-nightly.6 becomes 0.2.47nightly.6, which pacman sorts before 0.2.47,
+# the same scheme as upstream's own PKGBUILD in scripts/linux/arch/.
+
+pkgname=ardia
+pkgver=0.2.47nightly.6
+pkgrel=1
+pkgdesc="Chromium-based browser with Arc's sidebar and Dia's polish"
+arch=('x86_64')
+url='https://ardia.dev'
+license=('GPL-3.0-only')
+# From the .deb's Depends, mapped to Arch package names.
+depends=(
+  alsa-lib
+  at-spi2-core
+  cairo
+  curl
+  dbus
+  expat
+  gcc-libs
+  glib2
+  glibc
+  gtk3
+  hicolor-icon-theme
+  libcups
+  libsecret
+  libx11
+  libxcb
+  libxcomposite
+  libxdamage
+  libxext
+  libxfixes
+  libxkbcommon
+  libxrandr
+  mesa
+  nspr
+  nss
+  pango
+  systemd-libs
+  ttf-liberation
+  xdg-utils
+)
+optdepends=(
+  'polkit: confirm it is you before saved passwords and cards are shown'
+  'vulkan-icd-loader: use the system Vulkan loader'
+)
+options=('!strip' '!debug')
+_ver=${pkgver/nightly/-nightly}
+_deb="Ardia-${_ver}-linux-x64.deb"
+source=("https://github.com/ardia-browser/ardia/releases/download/v${_ver}/${_deb}")
+noextract=("${_deb}")
+# Checked by update.sh against the release's .sha256 file and GitHub's own
+# digest of the asset. Ardia publishes no signature.
+sha256sums=('2f89818c6a130104a4677357039c68e83e615371ae90c5a26f941be25ff86e84')
+
+prepare() {
+  rm -rf deb
+  mkdir deb
+  bsdtar -xOf "${_deb}" 'data.tar.*' | bsdtar -xf - -C deb
+}
+
+package() {
+  cp -a deb/usr "${pkgdir}/"
+
+  # The Debian copyright file names the license terms; keep it where Arch
+  # looks for licenses instead of under /usr/share/doc.
+  install -Dm644 deb/usr/share/doc/ardia/copyright \
+    "${pkgdir}/usr/share/licenses/${pkgname}/copyright"
+  rm -rf "${pkgdir}/usr/share/doc"
+
+  # Not carried over from postinst: the chrome-sandbox setuid bit (Arch kernels
+  # allow unprivileged user namespaces, which ardia-launch checks for first),
+  # the AppArmor profile (Arch doesn't enable AppArmor by default), and the
+  # Debian x-www-browser alternatives.
+  rm -rf "${pkgdir}/usr/share/ardia/apparmor"
+  rmdir --ignore-fail-on-non-empty "${pkgdir}/usr/share/ardia"
+}

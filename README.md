@@ -12,6 +12,7 @@ you ever seeing the PKGBUILD.
 | `capy` | [Capy](https://capy.ai/download) | Upstream's official `.deb`, repackaged here (no AUR base, so no review PRs) |
 | `codeaf` | [CodeAF](https://github.com/Agent-Field/CodeAF) | Built here from upstream's release tag (no AUR base, so no review PRs) |
 | `paper-desktop` | [Paper](https://paper.design/downloads) | Upstream's official `.deb`, repackaged here (no AUR base, so no review PRs) |
+| `ardia` | [Ardia](https://ardia.dev/) ([GitHub](https://github.com/ardia-browser/ardia)) | Upstream's official `.deb`, repackaged here (no AUR base, so no review PRs) |
 
 `orca-ide` is not `extra/orca`, which is GNOME's screen reader. Its updater
 checks GitHub's latest stable release and verifies the `.deb` against the
@@ -51,6 +52,16 @@ that builds Paper) hosts and signs. Its updater only takes a release when
 `.deb` comes from that signed index, and makepkg checks it on every build. The
 package drops the `.deb`'s `resources/package-type` marker, so Paper's own
 updater stays off.
+
+`ardia` follows Ardia's GitHub releases. Linux builds are nightlies so far, and
+not every nightly has one, so its updater takes the newest release that carries
+a Linux `.deb`. `0.2.47-nightly.6` becomes pkgver `0.2.47nightly.6`, which
+pacman sorts before the stable `0.2.47`, as in upstream's own PKGBUILD. The
+SHA-256 must match both the release's `.sha256` file and the digest GitHub
+recorded for the asset. Ardia publishes no signature, so this relies on HTTPS
+to GitHub. Ardia on Linux doesn't update itself; it only points you to the
+release page. The package leaves out the setuid sandbox helper bit and the
+AppArmor profile, since Arch allows unprivileged user namespaces.
 
 ## How it keeps updates safe
 
