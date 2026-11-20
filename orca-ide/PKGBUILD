@@ -2,7 +2,7 @@
 # Written for this repo (no AUR base); update.sh bumps pkgver and checksums.
 
 pkgname=orca-ide
-pkgver=1.4.264
+pkgver=1.4.265
 pkgrel=1
 pkgdesc='Orca agent development environment: run coding agents in parallel git worktrees'
 arch=('x86_64')
@@ -34,7 +34,7 @@ options=('!strip' '!debug')
 source=("https://github.com/stablyai/orca/releases/download/v${pkgver}/orca-ide_${pkgver}_amd64.deb"
         "orca-ide-LICENSE-${pkgver}::https://raw.githubusercontent.com/stablyai/orca/v${pkgver}/LICENSE")
 noextract=("orca-ide_${pkgver}_amd64.deb")
-b2sums=('02a0c4e1db869a24ea519e602ff24e3672d41b441c0c4b91d291594265ea640ef05e84d8c3d8712be9436ae21e7ab25e30f3da47dabe4027108f64b031490c7c'
+b2sums=('ac6e4d052f13f44f87b08ea768601b53c22912638da9f53b373d70bf858b1dad9f4b6f5d2f87607729bbcf3c0938215705f63d2de2b8e69ca62ec96ab5c4e047'
         'fdce4a5f4313d37ca3f4a68dc9c31a242cd7f0fb7eae5a9764b9ca79b9316d328d2374154443338f9addc9134490c95fd1973c79c307d5f228f0f37dd6e3fa45')
 
 prepare() {
