@@ -5,7 +5,7 @@
 # the same scheme as upstream's own PKGBUILD in scripts/linux/arch/.
 
 pkgname=ardia
-pkgver=0.2.47nightly.9
+pkgver=0.2.48
 pkgrel=1
 pkgdesc="Chromium-based browser with Arc's sidebar and Dia's polish"
 arch=('x86_64')
@@ -53,7 +53,7 @@ source=("https://github.com/ardia-browser/ardia/releases/download/v${_ver}/${_de
 noextract=("${_deb}")
 # Checked by update.sh against the release's .sha256 file and GitHub's own
 # digest of the asset. Ardia publishes no signature.
-sha256sums=('b2ba866e6f49e079d1ecb5aa3cd30ab41af187036700aaf1b1cce859e2836eab')
+sha256sums=('16e3317781eedad42c08a5a513ef2d83fc7fc2e5b51b7c14078b31f8e992e23a')
 
 prepare() {
   rm -rf deb
