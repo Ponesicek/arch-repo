@@ -13,6 +13,7 @@ you ever seeing the PKGBUILD.
 | `codeaf` | [CodeAF](https://github.com/Agent-Field/CodeAF) | Built here from upstream's release tag (no AUR base, so no review PRs) |
 | `paper-desktop` | [Paper](https://paper.design/downloads) | Upstream's official `.deb`, repackaged here (no AUR base, so no review PRs) |
 | `ardia` | [Ardia](https://ardia.dev/) ([GitHub](https://github.com/ardia-browser/ardia)) | Upstream's official `.deb`, repackaged here (no AUR base, so no review PRs) |
+| `ladybird-bin` | [Ladybird](https://ladybird.org/) ([GitHub](https://github.com/LadybirdBrowser/ladybird)) | [AUR `ladybird-bin`](https://aur.archlinux.org/packages/ladybird-bin) (upstream's official `.deb`) |
 
 `orca-ide` is not `extra/orca`, which is GNOME's screen reader. Its updater
 checks GitHub's latest stable release and verifies the `.deb` against the
@@ -62,6 +63,17 @@ recorded for the asset. Ardia publishes no signature, so this relies on HTTPS
 to GitHub. Ardia on Linux doesn't update itself; it only points you to the
 release page. The package leaves out the setuid sandbox helper bit and the
 AppArmor profile, since Arch allows unprivileged user namespaces.
+
+`ladybird-bin` uses the AUR PKGBUILD, which repackages the `.deb` from
+Ladybird's APT repository (the Ubuntu 26.04 build). Its updater only takes a
+release when that repository's `InRelease` carries a valid signature from
+Ladybird's APT key, pinned in [`ladybird-bin/keys/`](ladybird-bin/keys/)
+(fingerprint `4F3D 5DFE 64EB D9BB 35D5  8FBD CF9E F732 4C4B 27AE`, from
+`apt.ladybird.org/ladybird.asc`, which `download.ladybird.org/releases.json`
+names). The SHA-256 of each `.deb` comes from that signed index. The LICENSE
+file comes from the release tag on GitHub over HTTPS. The package drops the
+`.deb`'s `package-format` marker, so Ladybird's update check no longer tells
+you to update with `apt`. Ladybird is an alpha with no security promises yet.
 
 ## How it keeps updates safe
 
