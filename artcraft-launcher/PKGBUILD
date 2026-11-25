@@ -6,7 +6,7 @@
 # keys/pgp/, whose fingerprint is also published on https://getartcraft.com/linux.
 
 pkgname=artcraft-launcher
-pkgver=0.20.0
+pkgver=0.20.1
 pkgrel=1
 pkgdesc='Install, update and launch the Craft App Suite'
 arch=('x86_64')
@@ -44,7 +44,7 @@ source=("https://github.com/storytold/craft-launcher/releases/download/v${pkgver
         "https://github.com/storytold/craft-launcher/releases/download/v${pkgver}/${_pkg}.sig")
 noextract=("${_pkg}")
 validpgpkeys=('2B76741B414AAD6CD33E631213A005C0B9D7C3ED') # ArtCraft Linux Release Signing Key
-b2sums=('756a4ae4cf5ea1fcf24eec52f661c736f437d399b342583b5831e3b41978e6359bdfb797adf750c339be51605826b037770164658b5439f1586205945ce8e1f2'
+b2sums=('d6f6a0a31a0c5562ceacb5cf92673bd82065abf3a1a6540ee8d7d6e57095f2a4b7f9dc8460aad622061e529632f74ec7dc6ba3e26257f985556e2819ef74b59d'
         'SKIP')
 
 prepare() {
