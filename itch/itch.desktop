@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=itch
+Comment=Install and play itch.io games easily
+Exec=/usr/bin/itch %U
+Icon=itch
+Terminal=false
+StartupWMClass=itch
+Categories=Game;
+MimeType=x-scheme-handler/itchio;x-scheme-handler/itch;

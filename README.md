@@ -13,6 +13,7 @@ you ever seeing the PKGBUILD.
 | `codeaf` | [CodeAF](https://github.com/Agent-Field/CodeAF) | Built here from upstream's release tag (no AUR base, so no review PRs) |
 | `paper-desktop` | [Paper](https://paper.design/downloads) | Upstream's official `.deb`, repackaged here (no AUR base, so no review PRs) |
 | `ardia` | [Ardia](https://ardia.dev/) ([GitHub](https://github.com/ardia-browser/ardia)) | Upstream's official `.deb`, repackaged here (no AUR base, so no review PRs) |
+| `itch` | [itch](https://itch.io/app) ([GitHub](https://github.com/itchio/itch)) | Upstream's official tarball, repackaged here from [AUR `itch-bin`](https://aur.archlinux.org/packages/itch-bin) with self-update turned off (not tracked against the AUR, so no review PRs) |
 
 `orca-ide` is not `extra/orca`, which is GNOME's screen reader. Its updater
 checks GitHub's latest stable release and verifies the `.deb` against the
@@ -62,6 +63,22 @@ recorded for the asset. Ardia publishes no signature, so this relies on HTTPS
 to GitHub. Ardia on Linux doesn't update itself; it only points you to the
 release page. The package leaves out the setuid sandbox helper bit and the
 AppArmor profile, since Arch allows unprivileged user namespaces.
+
+`itch` follows itch's latest stable GitHub release (the `-canary` "kitch"
+prereleases are skipped) and checks the tarball against the SHA-256 GitHub
+recorded for it. itch publishes no signature, so this relies on HTTPS to
+GitHub. Normally the app updates itself every two hours by running
+`itch-setup --upgrade`, which installs a second copy into `~/.itch` and
+offers to restart into it. The PKGBUILD patches that call out of the main
+bundle, so pacman alone updates the app. The patch must match exactly once,
+and a release that changes that code fails to build rather than shipping
+with self-update on. The app still downloads its helpers `butler` (which
+installs your games) and `itch-setup` from `broth.itch.zone` into
+`~/.config/itch/broth` and keeps those current itself. The packaging is
+based on the AUR's `itch-bin`. It isn't tracked against the AUR, because
+adopting a review PR would overwrite the patch. *Open at login* in itch's
+settings won't work: it looks for the `io.itch.itch.desktop` file that
+`itch-setup` writes, which this package doesn't ship.
 
 ## How it keeps updates safe
 
@@ -260,4 +277,6 @@ capy/                          PKGBUILD repackaging the upstream .deb, update.sh
 codeaf/                        PKGBUILD building the upstream release tag, update.sh
 paper-desktop/                 PKGBUILD repackaging the upstream .deb, update.sh,
                                keys/<fingerprint>.asc ToDesktop APT key
+itch/                          PKGBUILD repackaging the upstream tarball with
+                               self-update patched out, update.sh
 ```

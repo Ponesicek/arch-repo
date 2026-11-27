@@ -1,0 +1,79 @@
+# Repackages the official itch.io app build from https://github.com/itchio/itch/releases.
+# Written for this repo, based on the AUR's itch-bin (no AUR tracking, because
+# prepare() patches the app and adopting the AUR files would drop that patch);
+# update.sh bumps pkgver and the checksum.
+
+pkgname=itch
+pkgver=26.22.0
+pkgrel=1
+pkgdesc='The itch.io desktop app: install, update and play your itch.io games'
+arch=('x86_64')
+url='https://itch.io/app'
+license=('MIT')
+depends=(
+  alsa-lib
+  at-spi2-core
+  cairo
+  dbus
+  expat
+  glib2
+  gtk3
+  libcups
+  libdrm
+  libx11
+  libxcb
+  libxcomposite
+  libxdamage
+  libxext
+  libxfixes
+  libxkbcommon
+  libxrandr
+  mesa
+  nspr
+  nss
+  pango
+  xdg-utils
+)
+optdepends=(
+  'firejail: sandbox preference'
+  'wine: Windows games'
+)
+conflicts=(itch-bin itch-setup itch-setup-bin)
+options=('!strip' '!debug')
+noextract=("itch-v${pkgver}-linux-amd64.tar.gz")
+source=("https://github.com/itchio/itch/releases/download/v${pkgver}/itch-v${pkgver}-linux-amd64.tar.gz"
+        'itch.desktop')
+sha256sums=('462408b2ef3dbebcd3c110040e0e58bd2ac8e12b0bd7995be87d393c6df0bda2'
+            'da9094c3f4d77760bc40b79214071eb19f3d932494f5d61a4a70091062799de8')
+
+prepare() {
+  rm -rf "itch-${pkgver}"
+  mkdir "itch-${pkgver}"
+  bsdtar -xf "itch-v${pkgver}-linux-amd64.tar.gz" -C "itch-${pkgver}"
+
+  # Turn off self-update. Every 2 hours the app runs `itch-setup --upgrade`,
+  # which installs a second, unmanaged copy into ~/.itch (plus a desktop file
+  # in ~/.local/share/applications) and offers to restart into it. pacman
+  # updates this copy instead. The match must hit exactly once, so a release
+  # that reshapes this code fails the build rather than shipping unpatched.
+  perl -0777 -i -pe '
+    $n = s/(async upgrade\([\w\$]+\)\{)(let [\w\$]+=this\.makeLogger\([\w\$]+\.logger\);try\{await [\w\$]+\.with\([\w\$]+,"check for self-update")/$1return;$2/g;
+    die "self-update patch matched $n times, expected 1\n" if $n != 1;
+  ' "itch-${pkgver}/resources/app/dist/main/main.bundle.cjs"
+}
+
+package() {
+  install -d "${pkgdir}/opt/itch" "${pkgdir}/usr/bin"
+  cp -a --no-preserve=ownership "itch-${pkgver}/." "${pkgdir}/opt/itch/"
+  ln -s /opt/itch/itch "${pkgdir}/usr/bin/itch"
+
+  install -Dm644 itch.desktop -t "${pkgdir}/usr/share/applications"
+  install -Dm644 "itch-${pkgver}/LICENSE" -t "${pkgdir}/usr/share/licenses/${pkgname}"
+
+  local images="itch-${pkgver}/resources/app/src/static/images"
+  local icons="${pkgdir}/usr/share/icons/hicolor"
+  install -Dm644 "${images}/window/itch/icon-macos.png" "${icons}/512x512/apps/itch.png"
+  install -Dm644 "${images}/tray/itch.png" "${icons}/256x256/apps/itch.png"
+  install -Dm644 "${images}/window/itch/icon.png" "${icons}/128x128/apps/itch.png"
+  install -Dm644 "${images}/window/itch/icon-32.png" "${icons}/32x32/apps/itch.png"
+}
