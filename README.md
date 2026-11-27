@@ -14,6 +14,7 @@ you ever seeing the PKGBUILD.
 | `paper-desktop` | [Paper](https://paper.design/downloads) | Upstream's official `.deb`, repackaged here (no AUR base, so no review PRs) |
 | `ardia` | [Ardia](https://ardia.dev/) ([GitHub](https://github.com/ardia-browser/ardia)) | Upstream's official `.deb`, repackaged here (no AUR base, so no review PRs) |
 | `itch` | [itch](https://itch.io/app) ([GitHub](https://github.com/itchio/itch)) | Upstream's official tarball, repackaged here from [AUR `itch-bin`](https://aur.archlinux.org/packages/itch-bin) with self-update turned off (not tracked against the AUR, so no review PRs) |
+| `doop` | [doop](https://doop.design) ([GitHub](https://github.com/doop-design/doop)) | Built here from upstream's desktop release tag, with self-update turned off (not tracked against the AUR's `doop-bin`, so no review PRs) |
 
 `orca-ide` is not `extra/orca`, which is GNOME's screen reader. Its updater
 checks GitHub's latest stable release and verifies the `.deb` against the
@@ -79,6 +80,19 @@ based on the AUR's `itch-bin`. It isn't tracked against the AUR, because
 adopting a review PR would overwrite the patch. *Open at login* in itch's
 settings won't work: it looks for the `io.itch.itch.desktop` file that
 `itch-setup` writes, which this package doesn't ship.
+
+`doop` is compiled in CI from the `desktop-vX.Y.Z` git tag. makepkg pins a
+checksum of the tagged tree, so a tag that moves fails the build. Its updater
+takes the newest stable desktop release that upstream also shipped a Linux
+`.deb` for. The app is a thin Tauri shell around the hosted app at
+`doop.design`, so the code you mostly run is the website, which this package
+can't pin. That site can use the shell's commands: it can run your local
+Claude Code (with only doop's own MCP tools, after a native confirmation
+dialog), add doop to your Codex config, and read fonts you pick. The PKGBUILD
+patches `updates_enabled()` to return false, so the shell never downloads
+upstream's `.deb` from its signed update feed. The patch must match exactly
+once, and a release that changes that code fails to build. The AUR's `doop-bin`
+repackages the `.deb` instead and keeps that updater on.
 
 ## How it keeps updates safe
 

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=doop
+Comment=Multiplayer design canvas for humans and AI agents
+Exec=doop-desktop %u
+Icon=doop-desktop
+StartupWMClass=doop-desktop
+Categories=Graphics;Office;
+MimeType=x-scheme-handler/doop;
+Terminal=false
