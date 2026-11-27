@@ -15,7 +15,8 @@ arch=('x86_64')
 url='https://doop.design'
 license=('AGPL-3.0-only')
 depends=('gcc-libs' 'glibc' 'gtk3' 'hicolor-icon-theme' 'webkit2gtk-4.1')
-makedepends=('cargo' 'git')
+# CI installs only makedepends, and the build links against these.
+makedepends=('cargo' 'git' 'gtk3' 'pkgconf' 'webkit2gtk-4.1')
 optdepends=('xdg-desktop-portal: native save and open dialogs'
             'claude-code: run doop agent tasks with your local Claude Code')
 provides=('doop-bin')
