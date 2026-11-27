@@ -3,7 +3,7 @@
 # and the checksums.
 
 pkgname=codeaf
-pkgver=0.8.3
+pkgver=0.8.4
 pkgrel=1
 pkgdesc='Open-source software factory for open models: coding agents in your terminal'
 arch=('x86_64')
@@ -18,7 +18,7 @@ options=('!lto' '!debug')
 _furrow_tag=v0.1.0
 source=("git+https://github.com/Agent-Field/CodeAF.git#tag=v${pkgver}"
         "furrow-${_furrow_tag}-linux-amd64::https://github.com/Agent-Field/furrow/releases/download/${_furrow_tag}/furrow-linux-amd64")
-sha256sums=('2ae708f9abd8543f3aaaf22463bc36e6ca0eef994c721b20a7b98878e1fc3e4a'
+sha256sums=('fb929259fb295ba6e954b20b0bc1c8e6d33817707274711f0bf22216a701d61f'
             'c7f87ede6f352aad05d3aea42517eac9c86609adeb625187286411492663e2b4')
 
 prepare() {
